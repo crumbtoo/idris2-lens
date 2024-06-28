@@ -3,6 +3,7 @@ module Control.Lens.Getter
 import Data.Bicontravariant
 import Data.Profunctor
 import Data.Profunctor.Costrong
+import Control.Monad.State
 import Control.Lens.Optic
 import Control.Lens.Indexed
 import Control.Lens.Lens
@@ -62,7 +63,6 @@ public export
 like : a -> Getter s a
 like = to . const
 
-
 ||| Access the value of an optic and apply a function to it, returning the result.
 public export
 views : Getter s a -> (a -> r) -> s -> r
@@ -72,6 +72,11 @@ views l = runForget . l . MkForget
 public export
 view : Getter s a -> s -> a
 view l = views l id
+
+||| Access the focus value of a state monad's state.
+public export
+use : MonadState s m => Getter s a -> m a
+use l = view l <$> get
 
 ||| Access the value and index of an optic and apply a function to them,
 ||| returning the result.
