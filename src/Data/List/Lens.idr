@@ -83,3 +83,22 @@ Each (List a) (List b) a b where
 public export
 Num i => IEach i (List a) (List b) a b where
   ieach = itraversed
+
+updateAt : Eq k => k -> List (k, v) -> Maybe v -> List (k, v)
+updateAt key []        x = []
+updateAt key ((k,x) :: xs) mx' =
+  if key == k
+     then maybe xs (\x' => (k,x') :: xs) mx'
+     else (k,x) :: updateAt key xs mx'
+
+namespace Ixed
+  public export
+  [AssocList] Eq k => Ixed k v (List (k, v)) where
+    ix key = optional' (lookup key) (\xs => updateAt key xs . Just)
+
+namespace At
+  public export
+  [AssocList] Eq k => At k v (List (k, v))
+      using Ixed.AssocList where
+    at key = lens (lookup key) (updateAt key)
+
